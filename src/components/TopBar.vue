@@ -2,7 +2,7 @@
   <div class="top-bar">
     <div class="title">Horse Racing Program</div>
     <div class="actions">
-      <button @click="generateProgram">Generate Program</button>
+      <button @click="$emit('generateProgram')">Generate Program</button>
       <button @click="toggleStartPause">
         {{ isRunning ? "Pause" : "Start" }}
       </button>
@@ -15,20 +15,15 @@ import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   name: "TopBar",
-  setup() {
+  setup(_, { emit }) {
     const isRunning = ref(false);
-
-    const generateProgram = () => {
-      // Add logic to generate program
-      console.log("Program generated");
-    };
 
     const toggleStartPause = () => {
       isRunning.value = !isRunning.value;
-      console.log(isRunning.value ? "Started" : "Paused");
+      emit("toggleStartPause", isRunning.value);
     };
 
-    return { generateProgram, toggleStartPause, isRunning };
+    return { toggleStartPause, isRunning };
   },
 });
 </script>

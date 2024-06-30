@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <TopBar />
+    <TopBar @generateProgram="handleGenerateProgram" />
     <div class="content">
       <LeftComponent class="content-left" />
       <MiddleComponent class="content-middle" />
@@ -15,6 +15,7 @@ import TopBar from "@/components/TopBar.vue";
 import LeftComponent from "@/components/LeftComponent.vue";
 import MiddleComponent from "@/components/MiddleComponent.vue";
 import RightComponent from "@/components/RightComponent.vue";
+import { useStore } from "vuex";
 
 @Options({
   components: {
@@ -24,7 +25,13 @@ import RightComponent from "@/components/RightComponent.vue";
     RightComponent,
   },
 })
-export default class HomeView extends Vue {}
+export default class HomeView extends Vue {
+  store = useStore();
+
+  handleGenerateProgram() {
+    this.store.commit("triggerGenerateProgram");
+  }
+}
 </script>
 
 <style scoped>

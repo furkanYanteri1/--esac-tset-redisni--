@@ -59,6 +59,7 @@ const horses: Horse[] = names.map((name) => ({
 export default createStore({
   state: {
     horses,
+    generateProgramTrigger: false,
   },
   getters: {
     randomHorses: (state) => {
@@ -66,7 +67,11 @@ export default createStore({
       return shuffled.slice(0, 10);
     },
   },
-  mutations: {},
+  mutations: {
+    triggerGenerateProgram(state) {
+      state.generateProgramTrigger = !state.generateProgramTrigger;
+    },
+  },
   actions: {},
   modules: {},
 });
