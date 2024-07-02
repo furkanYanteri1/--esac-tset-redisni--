@@ -59,7 +59,8 @@ const horses: Horse[] = names.map((name) => ({
 export default createStore({
   state: {
     horses,
-    generateProgramTrigger: false,
+    programs: [] as Horse[][],
+    isRunning: false,
   },
   getters: {
     randomHorses: (state) => {
@@ -68,8 +69,19 @@ export default createStore({
     },
   },
   mutations: {
-    triggerGenerateProgram(state) {
-      state.generateProgramTrigger = !state.generateProgramTrigger;
+    updatePrograms(state, programs: Horse[][]) {
+      state.programs = programs;
+    },
+    updateResults(
+      state,
+      { index, results }: { index: number; results: Horse[] }
+    ) {
+      if (state.programs[index]) {
+        state.programs[index] = results;
+      }
+    },
+    setIsRunning(state, isRunning: boolean) {
+      state.isRunning = isRunning;
     },
   },
   actions: {},
