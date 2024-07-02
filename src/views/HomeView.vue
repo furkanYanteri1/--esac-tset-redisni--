@@ -1,6 +1,9 @@
 <template>
   <div class="home">
-    <TopBar @generateProgram="handleGenerateProgram" />
+    <TopBar
+      @generateProgram="generateProgram"
+      @toggleStartPause="toggleStartPause"
+    />
     <div class="content">
       <LeftComponent class="content-left" />
       <MiddleComponent class="content-middle" />
@@ -10,28 +13,40 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from "vue-class-component";
+import { defineComponent } from "vue";
+import { useStore } from "vuex";
 import TopBar from "@/components/TopBar.vue";
 import LeftComponent from "@/components/LeftComponent.vue";
 import MiddleComponent from "@/components/MiddleComponent.vue";
 import RightComponent from "@/components/RightComponent.vue";
-import { useStore } from "vuex";
 
-@Options({
+export default defineComponent({
+  name: "HomeView",
   components: {
     TopBar,
     LeftComponent,
     MiddleComponent,
     RightComponent,
   },
-})
-export default class HomeView extends Vue {
-  store = useStore();
+  setup() {
+    const store = useStore();
 
-  handleGenerateProgram() {
-    this.store.commit("triggerGenerateProgram");
-  }
-}
+    const generateProgram = () => {
+      const programs = Array.from(
+        { length: 6 },
+        () => store.getters.randomHorses
+      );
+      store.commit("updatePrograms", programs);
+      console.log("Generated programs:", programs); // Debugging
+    };
+
+    const toggleStartPause = (isRunning: boolean) => {
+      store.commit("setIsRunning", isRunning);
+    };
+
+    return { generateProgram, toggleStartPause };
+  },
+});
 </script>
 
 <style scoped>
@@ -50,18 +65,5 @@ export default class HomeView extends Vue {
 .content-middle,
 .content-right {
   flex: 1;
-  padding: 10px;
-}
-
-.content-left {
-  border-right: 2px solid #e74c3c;
-}
-
-.content-middle {
-  border-right: 2px solid #f39c12;
-}
-
-.content-right {
-  border-right: 2px solid #2ecc71;
 }
 </style>
