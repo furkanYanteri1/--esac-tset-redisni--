@@ -37,9 +37,12 @@ export default defineComponent({
         currentRace.value = store.state.programs[currentRaceIndex.value];
         horsePositions.value = Array(currentRace.value.length).fill(0);
 
-        let seconds = 0;
         intervalId.value = setInterval(() => {
-          if (seconds >= 10) {
+          horsePositions.value = horsePositions.value.map((pos) =>
+            Math.min(pos + Math.random() * 5, 100)
+          );
+
+          if (horsePositions.value.every((pos) => pos >= 100)) {
             if (intervalId.value !== null) {
               clearInterval(intervalId.value);
             }
@@ -48,12 +51,9 @@ export default defineComponent({
               results: currentRace.value,
             });
             currentRaceIndex.value++;
-            startRace();
-          } else {
-            horsePositions.value = horsePositions.value.map(
-              (pos) => pos + Math.random() * 10
-            );
-            seconds++;
+            if (currentRaceIndex.value < store.state.programs.length) {
+              startRace();
+            }
           }
         }, 1000) as unknown as number; // Type assertion for setInterval return type
       }
@@ -107,7 +107,7 @@ export default defineComponent({
 
 .lane {
   position: relative;
-  width: 100%;
+  width: 90%;
   height: 20px;
   border-bottom: 1px solid #ddd;
 }
