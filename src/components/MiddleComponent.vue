@@ -122,6 +122,7 @@ export default defineComponent({
 .horse {
   position: absolute;
   transition: left 1s;
+  transform: scaleX(-1); /* Face the horse to right */
 }
 
 .horse-name {
