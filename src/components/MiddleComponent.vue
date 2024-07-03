@@ -7,6 +7,7 @@
           <div class="horse" :style="{ left: horsePositions[index] + '%' }">
             🐎
           </div>
+          <div class="horse-name">{{ horse.name }}</div>
         </div>
       </div>
     </div>
@@ -33,14 +34,17 @@ export default defineComponent({
     const intervalId = ref<number | null>(null);
 
     const startRace = () => {
+      console.log("Starting race", currentRaceIndex.value);
       if (currentRaceIndex.value < store.state.programs.length) {
         currentRace.value = store.state.programs[currentRaceIndex.value];
         horsePositions.value = Array(currentRace.value.length).fill(0);
 
         intervalId.value = setInterval(() => {
-          horsePositions.value = horsePositions.value.map((pos) =>
+          horsePositions.value = horsePositions.value.map((pos, i) =>
             Math.min(pos + Math.random() * 5, 100)
           );
+
+          console.log("Horse positions", horsePositions.value);
 
           if (horsePositions.value.every((pos) => pos >= 100)) {
             if (intervalId.value !== null) {
@@ -62,6 +66,7 @@ export default defineComponent({
     watch(
       () => store.state.isRunning,
       (isRunning) => {
+        console.log("isRunning changed to", isRunning);
         if (isRunning) {
           startRace();
         } else {
@@ -89,7 +94,7 @@ export default defineComponent({
 
 <style scoped>
 .middle-component {
-  background-color: #f39c12;
+  border: 1px solid red;
   padding: 10px;
   text-align: center;
   height: 100%;
@@ -97,9 +102,8 @@ export default defineComponent({
 
 .race-track {
   position: relative;
-  height: 200px;
+  height: 100%;
   border: 2px solid #000;
-  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -108,13 +112,25 @@ export default defineComponent({
 .lane {
   position: relative;
   width: 90%;
-  height: 20px;
+  height: 50px;
   border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .horse {
   position: absolute;
   transition: left 1s;
-  transform: scaleX(-1); /* This line flips the horse emoji */
+  transform: scaleX(-1); /* Face the horse to right */
+}
+
+.horse-name {
+  font-size: 8px;
+  margin-right: 5px;
+  position: absolute;
+  left: 0;
+  top: -2px;
+  white-space: nowrap;
 }
 </style>

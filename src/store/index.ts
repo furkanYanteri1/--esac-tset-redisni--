@@ -6,6 +6,17 @@ interface Horse {
   condition: number;
 }
 
+interface RaceResult {
+  name: string;
+}
+
+interface State {
+  horses: Horse[];
+  programs: Horse[][];
+  results: RaceResult[][];
+  isRunning: boolean;
+}
+
 const names = [
   "MADRAS",
   "MANGUSTA",
@@ -56,10 +67,11 @@ const horses: Horse[] = names.map((name) => ({
   condition: getRandomCondition(),
 }));
 
-export default createStore({
+export default createStore<State>({
   state: {
     horses,
-    programs: [] as Horse[][],
+    programs: [],
+    results: [],
     isRunning: false,
   },
   getters: {
@@ -69,16 +81,17 @@ export default createStore({
     },
   },
   mutations: {
-    updatePrograms(state, programs: Horse[][]) {
-      state.programs = programs;
+    generatePrograms(state) {
+      state.programs = Array.from({ length: 6 }, () => {
+        const shuffled = state.horses.sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, 10);
+      });
+      state.results = Array(state.programs.length).fill([]); // Initialize results array
     },
-    updateResults(
-      state,
-      { index, results }: { index: number; results: Horse[] }
-    ) {
-      if (state.programs[index]) {
-        state.programs[index] = results;
-      }
+    updateResults(state, payload: { index: number; results: Horse[] }) {
+      state.results[payload.index] = payload.results.map((horse) => ({
+        name: horse.name,
+      }));
     },
     setIsRunning(state, isRunning: boolean) {
       state.isRunning = isRunning;

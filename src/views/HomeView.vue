@@ -13,40 +13,32 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { useStore } from "vuex";
+import { Options, Vue } from "vue-class-component";
 import TopBar from "@/components/TopBar.vue";
 import LeftComponent from "@/components/LeftComponent.vue";
 import MiddleComponent from "@/components/MiddleComponent.vue";
 import RightComponent from "@/components/RightComponent.vue";
+import { useStore } from "vuex";
 
-export default defineComponent({
-  name: "HomeView",
+@Options({
   components: {
     TopBar,
     LeftComponent,
     MiddleComponent,
     RightComponent,
   },
-  setup() {
-    const store = useStore();
+})
+export default class HomeView extends Vue {
+  store = useStore();
 
-    const generateProgram = () => {
-      const programs = Array.from(
-        { length: 6 },
-        () => store.getters.randomHorses
-      );
-      store.commit("updatePrograms", programs);
-      console.log("Generated programs:", programs); // Debugging
-    };
+  generateProgram() {
+    this.store.commit("generatePrograms");
+  }
 
-    const toggleStartPause = (isRunning: boolean) => {
-      store.commit("setIsRunning", isRunning);
-    };
-
-    return { generateProgram, toggleStartPause };
-  },
-});
+  toggleStartPause(isRunning: boolean) {
+    this.store.commit("setIsRunning", isRunning);
+  }
+}
 </script>
 
 <style scoped>
@@ -65,5 +57,18 @@ export default defineComponent({
 .content-middle,
 .content-right {
   flex: 1;
+  padding: 10px;
+}
+
+.content-left {
+  border-right: 2px solid #e74c3c;
+}
+
+.content-middle {
+  border-right: 2px solid #f39c12;
+}
+
+.content-right {
+  border-right: 2px solid #2ecc71;
 }
 </style>
