@@ -37,7 +37,6 @@ export default defineComponent({
 
 <style scoped>
 .right-component {
-  background-color: #2ecc71;
   padding: 10px;
   text-align: center;
   height: 100%;
@@ -48,6 +47,7 @@ export default defineComponent({
 }
 
 table {
+  background-color: lightgray;
   width: 100%;
   border-collapse: collapse;
 }

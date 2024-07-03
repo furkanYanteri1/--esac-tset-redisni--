@@ -51,6 +51,7 @@ export default defineComponent({
 
 <style scoped>
 .home {
+  background-color: gray;
   display: flex;
   flex-direction: column;
   height: 100vh;

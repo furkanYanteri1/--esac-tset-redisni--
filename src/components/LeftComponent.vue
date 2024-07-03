@@ -84,6 +84,7 @@ export default defineComponent({
 }
 
 table {
+  background-color: lightgray;
   width: 100%;
   border-collapse: collapse;
 }

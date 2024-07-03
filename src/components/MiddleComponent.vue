@@ -89,7 +89,6 @@ export default defineComponent({
 
 <style scoped>
 .middle-component {
-  background-color: #f39c12;
   padding: 10px;
   text-align: center;
   height: 100%;
