@@ -2,10 +2,14 @@
   <div class="top-bar">
     <div class="title">Horse Racing Program</div>
     <div class="actions">
-      <button ref="generateButton" @click="$emit('generateProgram')">
+      <button
+        ref="generateButton"
+        @click="$emit('generateProgram')"
+        class="generate-program-button"
+      >
         Generate Program
       </button>
-      <button @click="toggleStartPause">
+      <button @click="toggleStartPause" class="start-button">
         {{ isRunning ? "Pause" : "Start" }}
       </button>
     </div>
@@ -14,6 +18,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from "vue";
+import { startTour } from "@/tour";
 
 export default defineComponent({
   name: "TopBar",
@@ -33,6 +38,7 @@ export default defineComponent({
           generateButton.value?.classList.remove("shine");
         }, 2000);
       }
+      startTour();
     });
 
     return { toggleStartPause, isRunning, generateButton };
