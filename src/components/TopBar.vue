@@ -2,7 +2,9 @@
   <div class="top-bar">
     <div class="title">Horse Racing Program</div>
     <div class="actions">
-      <button @click="$emit('generateProgram')">Generate Program</button>
+      <button ref="generateButton" @click="$emit('generateProgram')">
+        Generate Program
+      </button>
       <button @click="toggleStartPause">
         {{ isRunning ? "Pause" : "Start" }}
       </button>
@@ -11,19 +13,29 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 
 export default defineComponent({
   name: "TopBar",
   setup(_, { emit }) {
     const isRunning = ref(false);
+    const generateButton = ref<HTMLButtonElement | null>(null);
 
     const toggleStartPause = () => {
       isRunning.value = !isRunning.value;
       emit("toggleStartPause", isRunning.value);
     };
 
-    return { toggleStartPause, isRunning };
+    onMounted(() => {
+      if (generateButton.value) {
+        generateButton.value.classList.add("shine");
+        setTimeout(() => {
+          generateButton.value?.classList.remove("shine");
+        }, 2000);
+      }
+    });
+
+    return { toggleStartPause, isRunning, generateButton };
   },
 });
 </script>
@@ -55,5 +67,21 @@ export default defineComponent({
 
 .actions button:hover {
   background-color: #2980b9;
+}
+
+@keyframes shine {
+  0% {
+    box-shadow: 0 0 15px rgb(86, 235, 255);
+  }
+  50% {
+    box-shadow: 0 0 15px rgb(255, 255, 255);
+  }
+  100% {
+    box-shadow: 0 0 15px rgb(86, 235, 255);
+  }
+}
+
+.shine {
+  animation: shine 2s;
 }
 </style>
