@@ -3,6 +3,8 @@
     <div v-if="currentRace.length">
       <h3>Race {{ currentRaceIndex + 1 }}</h3>
       <div class="race-track">
+        <!-- Adjust the src path to correctly reference the sound file -->
+        <audio ref="startSound" src="/sound/start-sound.mp3"></audio>
         <div v-for="(horse, index) in currentRace" :key="index" class="lane">
           <div class="horse" :style="{ left: horsePositions[index] + '%' }">
             🐎
@@ -33,6 +35,7 @@ export default defineComponent({
     const horsePositions = ref<number[]>([]);
     const intervalId = ref<number | null>(null);
     const finishedHorses = ref<Set<string>>(new Set());
+    const startSound = ref<HTMLAudioElement | null>(null);
 
     const startRace = () => {
       if (currentRaceIndex.value < store.state.programs.length) {
@@ -40,8 +43,10 @@ export default defineComponent({
         horsePositions.value = Array(currentRace.value.length).fill(0);
         finishedHorses.value.clear();
 
-        // Wait for 1 second before starting the race
+        // Wait for 2 seconds before starting the race
         setTimeout(() => {
+          startSound.value?.play(); // Play the start sound
+
           intervalId.value = setInterval(() => {
             horsePositions.value = horsePositions.value.map((pos, i) => {
               if (pos < 100) {
@@ -73,7 +78,7 @@ export default defineComponent({
               }
             }
           }, 1000) as unknown as number; // Type assertion for setInterval return type
-        }, 1000); // 1 second delay before starting the race
+        }, 2000); // 2-second delay before starting the race
       }
     };
 
@@ -92,6 +97,7 @@ export default defineComponent({
 
     onMounted(() => {
       currentRaceIndex.value = 0;
+      startSound.value = document.querySelector("audio"); // Initialize the audio element
     });
 
     onUnmounted(() => {
@@ -100,7 +106,7 @@ export default defineComponent({
       }
     });
 
-    return { currentRace, currentRaceIndex, horsePositions };
+    return { currentRace, currentRaceIndex, horsePositions, startSound };
   },
 });
 </script>
