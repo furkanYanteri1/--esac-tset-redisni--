@@ -4,12 +4,16 @@
     <div class="actions">
       <button
         ref="generateButton"
-        @click="$emit('generateProgram')"
+        @click="generateProgram"
         class="generate-program-button"
       >
         Generate Program
       </button>
-      <button @click="toggleStartPause" class="start-button">
+      <button
+        @click="toggleStartPause"
+        :disabled="!programsGenerated"
+        class="start-button"
+      >
         {{ isRunning ? "Pause" : "Start" }}
       </button>
     </div>
@@ -25,10 +29,16 @@ export default defineComponent({
   setup(_, { emit }) {
     const isRunning = ref(false);
     const generateButton = ref<HTMLButtonElement | null>(null);
+    const programsGenerated = ref(false);
 
     const toggleStartPause = () => {
       isRunning.value = !isRunning.value;
       emit("toggleStartPause", isRunning.value);
+    };
+
+    const generateProgram = () => {
+      emit("generateProgram");
+      programsGenerated.value = true; // Simulate program generation
     };
 
     onMounted(() => {
@@ -41,7 +51,13 @@ export default defineComponent({
       startTour();
     });
 
-    return { toggleStartPause, isRunning, generateButton };
+    return {
+      toggleStartPause,
+      isRunning,
+      generateButton,
+      generateProgram,
+      programsGenerated,
+    };
   },
 });
 </script>
@@ -71,7 +87,12 @@ export default defineComponent({
   border-radius: 4px;
 }
 
-.actions button:hover {
+.actions button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+.actions button:hover:enabled {
   background-color: #2980b9;
 }
 
