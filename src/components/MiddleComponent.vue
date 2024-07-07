@@ -1,9 +1,28 @@
 <template>
   <div class="middle-component">
+    <div class="speed-controls">
+      <button
+        :class="{ active: selectedSpeed === 'slow' }"
+        @click="selectSpeed('slow')"
+      >
+        Slow
+      </button>
+      <button
+        :class="{ active: selectedSpeed === 'normal' }"
+        @click="selectSpeed('normal')"
+      >
+        Normal
+      </button>
+      <button
+        :class="{ active: selectedSpeed === 'fast' }"
+        @click="selectSpeed('fast')"
+      >
+        Fast
+      </button>
+    </div>
     <div v-if="currentRace.length">
       <h3>Race {{ currentRaceIndex + 1 }}</h3>
       <div class="race-track">
-        <!-- Adjust the src path to correctly reference the sound file -->
         <audio ref="startSound" src="/sound/start-sound.mp3"></audio>
         <div v-for="(horse, index) in currentRace" :key="index" class="lane">
           <div class="horse" :style="{ left: horsePositions[index] + '%' }">
@@ -36,12 +55,15 @@ export default defineComponent({
     const intervalId = ref<number | null>(null);
     const finishedHorses = ref<Set<string>>(new Set());
     const startSound = ref<HTMLAudioElement | null>(null);
+    const selectedSpeed = ref<string>("normal"); // Default speed is "normal"
 
     const startRace = () => {
       if (currentRaceIndex.value < store.state.programs.length) {
         currentRace.value = store.state.programs[currentRaceIndex.value];
         horsePositions.value = Array(currentRace.value.length).fill(0);
         finishedHorses.value.clear();
+
+        const intervalTime = getIntervalTime(selectedSpeed.value);
 
         // Wait for 2 seconds before starting the race
         setTimeout(() => {
@@ -77,7 +99,7 @@ export default defineComponent({
                 startRace();
               }
             }
-          }, 1000) as unknown as number; // Type assertion for setInterval return type
+          }, intervalTime); // Use dynamic interval time based on selected speed
         }, 2000); // 2-second delay before starting the race
       }
     };
@@ -106,7 +128,33 @@ export default defineComponent({
       }
     });
 
-    return { currentRace, currentRaceIndex, horsePositions, startSound };
+    // Function to calculate interval time based on selected speed
+    function getIntervalTime(speed: string): number {
+      switch (speed) {
+        case "slow":
+          return 1000; // Example slower interval time
+        case "normal":
+          return 500; // Default interval time
+        case "fast":
+          return 100; // Example faster interval time
+        default:
+          return 1000; // Default to normal interval time
+      }
+    }
+
+    // Function to handle speed selection
+    function selectSpeed(speed: string): void {
+      selectedSpeed.value = speed;
+    }
+
+    return {
+      currentRace,
+      currentRaceIndex,
+      horsePositions,
+      startSound,
+      selectedSpeed,
+      selectSpeed,
+    };
   },
 });
 </script>
@@ -151,5 +199,25 @@ export default defineComponent({
   left: 0;
   top: -2px;
   white-space: nowrap;
+}
+
+.speed-controls {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.speed-controls button {
+  background-color: #3498db;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  margin: 0 5px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.speed-controls button.active {
+  background-color: #2980b9;
 }
 </style>
