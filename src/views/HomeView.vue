@@ -5,9 +5,12 @@
       @toggleStartPause="toggleStartPause"
     />
     <div class="content">
-      <LeftComponent class="content-left" />
-      <MiddleComponent @horseFinished="updateResults" class="content-middle" />
-      <RightComponent class="content-right" />
+      <LeftComponent class="content-seperate" />
+      <MiddleComponent
+        @horseFinished="updateResults"
+        class="content-seperate"
+      />
+      <RightComponent class="content-seperate" />
     </div>
   </div>
 </template>
@@ -63,22 +66,9 @@ export default class HomeView extends Vue {
   flex: 1;
 }
 
-.content-left,
-.content-middle,
-.content-right {
+.content-seperate {
   flex: 1;
   padding: 10px;
-}
-
-.content-left {
-  border-right: 2px solid #e74c3c;
-}
-
-.content-middle {
-  border-right: 2px solid #f39c12;
-}
-
-.content-right {
-  border-right: 2px solid #2ecc71;
+  border-right: 2px solid #2c3e50;
 }
 </style>

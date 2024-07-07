@@ -86,10 +86,10 @@ th {
 }
 
 .program-table th {
-  background-color: #4caf50;
+  background-color: #ff9800;
 }
 
 .result-table th {
-  background-color: #ff9800;
+  background-color: #4caf50;
 }
 </style>

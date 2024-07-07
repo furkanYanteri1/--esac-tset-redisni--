@@ -161,7 +161,6 @@ export default defineComponent({
 
 <style scoped>
 .middle-component {
-  border: 1px solid red;
   padding: 10px;
   text-align: center;
   height: 100%;
