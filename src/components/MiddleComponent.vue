@@ -205,19 +205,20 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   margin-bottom: 10px;
+  background-color: #2c3e50;
+  padding: 5px;
 }
 
 .speed-controls button {
-  background-color: #3498db;
+  background-color: #195d8b;
   border: none;
   color: white;
   padding: 10px 20px;
   margin: 0 5px;
   cursor: pointer;
-  border-radius: 4px;
 }
 
 .speed-controls button.active {
-  background-color: #2980b9;
+  border: 1px solid rgb(123, 187, 255);
 }
 </style>
