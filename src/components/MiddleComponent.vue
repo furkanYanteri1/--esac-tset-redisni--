@@ -40,37 +40,40 @@ export default defineComponent({
         horsePositions.value = Array(currentRace.value.length).fill(0);
         finishedHorses.value.clear();
 
-        intervalId.value = setInterval(() => {
-          horsePositions.value = horsePositions.value.map((pos, i) => {
-            if (pos < 100) {
-              return Math.min(pos + Math.random() * 5, 100);
-            }
-            return pos;
-          });
+        // Wait for 1 second before starting the race
+        setTimeout(() => {
+          intervalId.value = setInterval(() => {
+            horsePositions.value = horsePositions.value.map((pos, i) => {
+              if (pos < 100) {
+                return Math.min(pos + Math.random() * 5, 100);
+              }
+              return pos;
+            });
 
-          horsePositions.value.forEach((pos, i) => {
-            if (
-              pos >= 100 &&
-              !finishedHorses.value.has(currentRace.value[i].name)
-            ) {
-              finishedHorses.value.add(currentRace.value[i].name);
-              emit("horseFinished", {
-                horseName: currentRace.value[i].name,
-                raceIndex: currentRaceIndex.value,
-              });
-            }
-          });
+            horsePositions.value.forEach((pos, i) => {
+              if (
+                pos >= 100 &&
+                !finishedHorses.value.has(currentRace.value[i].name)
+              ) {
+                finishedHorses.value.add(currentRace.value[i].name);
+                emit("horseFinished", {
+                  horseName: currentRace.value[i].name,
+                  raceIndex: currentRaceIndex.value,
+                });
+              }
+            });
 
-          if (horsePositions.value.every((pos) => pos >= 100)) {
-            if (intervalId.value !== null) {
-              clearInterval(intervalId.value);
+            if (horsePositions.value.every((pos) => pos >= 100)) {
+              if (intervalId.value !== null) {
+                clearInterval(intervalId.value);
+              }
+              currentRaceIndex.value++;
+              if (currentRaceIndex.value < store.state.programs.length) {
+                startRace();
+              }
             }
-            currentRaceIndex.value++;
-            if (currentRaceIndex.value < store.state.programs.length) {
-              startRace();
-            }
-          }
-        }, 1000) as unknown as number; // Type assertion for setInterval return type
+          }, 1000) as unknown as number; // Type assertion for setInterval return type
+        }, 1000); // 1 second delay before starting the race
       }
     };
 
