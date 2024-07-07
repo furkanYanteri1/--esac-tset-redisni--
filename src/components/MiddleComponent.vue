@@ -26,34 +26,45 @@ interface Horse {
 
 export default defineComponent({
   name: "MiddleComponent",
-  setup() {
+  setup(_, { emit }) {
     const store = useStore();
     const currentRace = ref<Horse[]>([]);
     const currentRaceIndex = ref(0);
     const horsePositions = ref<number[]>([]);
     const intervalId = ref<number | null>(null);
+    const finishedHorses = ref<Set<string>>(new Set());
 
     const startRace = () => {
-      console.log("Starting race", currentRaceIndex.value);
       if (currentRaceIndex.value < store.state.programs.length) {
         currentRace.value = store.state.programs[currentRaceIndex.value];
         horsePositions.value = Array(currentRace.value.length).fill(0);
+        finishedHorses.value.clear();
 
         intervalId.value = setInterval(() => {
-          horsePositions.value = horsePositions.value.map((pos, i) =>
-            Math.min(pos + Math.random() * 5, 100)
-          );
+          horsePositions.value = horsePositions.value.map((pos, i) => {
+            if (pos < 100) {
+              return Math.min(pos + Math.random() * 5, 100);
+            }
+            return pos;
+          });
 
-          console.log("Horse positions", horsePositions.value);
+          horsePositions.value.forEach((pos, i) => {
+            if (
+              pos >= 100 &&
+              !finishedHorses.value.has(currentRace.value[i].name)
+            ) {
+              finishedHorses.value.add(currentRace.value[i].name);
+              emit("horseFinished", {
+                horseName: currentRace.value[i].name,
+                raceIndex: currentRaceIndex.value,
+              });
+            }
+          });
 
           if (horsePositions.value.every((pos) => pos >= 100)) {
             if (intervalId.value !== null) {
               clearInterval(intervalId.value);
             }
-            store.commit("updateResults", {
-              index: currentRaceIndex.value,
-              results: currentRace.value,
-            });
             currentRaceIndex.value++;
             if (currentRaceIndex.value < store.state.programs.length) {
               startRace();
@@ -66,7 +77,6 @@ export default defineComponent({
     watch(
       () => store.state.isRunning,
       (isRunning) => {
-        console.log("isRunning changed to", isRunning);
         if (isRunning) {
           startRace();
         } else {

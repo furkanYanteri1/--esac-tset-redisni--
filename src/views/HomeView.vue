@@ -6,7 +6,7 @@
     />
     <div class="content">
       <LeftComponent class="content-left" />
-      <MiddleComponent class="content-middle" />
+      <MiddleComponent @horseFinished="updateResults" class="content-middle" />
       <RightComponent class="content-right" />
     </div>
   </div>
@@ -37,6 +37,16 @@ export default class HomeView extends Vue {
 
   toggleStartPause(isRunning: boolean) {
     this.store.commit("setIsRunning", isRunning);
+  }
+
+  updateResults({
+    horseName,
+    raceIndex,
+  }: {
+    horseName: string;
+    raceIndex: number;
+  }) {
+    this.store.commit("addHorseToResults", { horseName, raceIndex });
   }
 }
 </script>
