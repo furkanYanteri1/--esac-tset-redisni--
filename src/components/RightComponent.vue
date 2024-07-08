@@ -56,7 +56,8 @@ export default defineComponent({
 .right-component {
   padding: 10px;
   text-align: center;
-  height: 100%;
+  height: 90vh;
+  overflow: scroll !important;
 }
 
 .race-table {

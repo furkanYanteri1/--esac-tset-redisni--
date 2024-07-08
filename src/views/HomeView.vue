@@ -70,5 +70,6 @@ export default class HomeView extends Vue {
   flex: 1;
   padding: 10px;
   border-right: 2px solid #2c3e50;
+  border-left: 2px solid #2c3e50;
 }
 </style>
