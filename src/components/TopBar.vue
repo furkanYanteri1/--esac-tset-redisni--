@@ -6,6 +6,7 @@
         ref="generateButton"
         @click="generateProgram"
         class="generate-program-button"
+        :disabled="isRunning"
       >
         Generate Program
       </button>
@@ -26,14 +27,18 @@ import { startTour } from "@/tour";
 
 export default defineComponent({
   name: "TopBar",
-  setup(_, { emit }) {
-    const isRunning = ref(false);
+  props: {
+    isRunning: {
+      type: Boolean,
+      required: true,
+    },
+  },
+  setup(props, { emit }) {
     const generateButton = ref<HTMLButtonElement | null>(null);
     const programsGenerated = ref(false);
 
     const toggleStartPause = () => {
-      isRunning.value = !isRunning.value;
-      emit("toggleStartPause", isRunning.value);
+      emit("toggleStartPause", !props.isRunning);
     };
 
     const generateProgram = () => {
@@ -53,7 +58,6 @@ export default defineComponent({
 
     return {
       toggleStartPause,
-      isRunning,
       generateButton,
       generateProgram,
       programsGenerated,

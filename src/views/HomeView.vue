@@ -3,6 +3,7 @@
     <TopBar
       @generateProgram="generateProgram"
       @toggleStartPause="toggleStartPause"
+      :isRunning="isRunning"
     />
     <div class="content">
       <LeftComponent class="content-seperate" />
@@ -33,6 +34,10 @@ import { useStore } from "vuex";
 })
 export default class HomeView extends Vue {
   store = useStore();
+
+  get isRunning() {
+    return this.store.state.isRunning;
+  }
 
   generateProgram() {
     this.store.commit("generatePrograms");

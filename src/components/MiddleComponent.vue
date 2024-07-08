@@ -56,47 +56,58 @@ export default defineComponent({
     const finishedHorses = ref<Set<string>>(new Set());
     const startSound = ref<HTMLAudioElement | null>(null);
     const selectedSpeed = ref<string>("normal"); // Default speed is "normal"
+    const paused = ref<boolean>(false); // Flag to track if race is paused
+    const startSoundPlayed = ref<boolean>(false); // Flag to track if start sound has been played for current race
 
     const startRace = () => {
       if (currentRaceIndex.value < store.state.programs.length) {
         currentRace.value = store.state.programs[currentRaceIndex.value];
-        horsePositions.value = Array(currentRace.value.length).fill(0);
-        finishedHorses.value.clear();
+        // Initialize positions if not already initialized or resumed
+        if (horsePositions.value.length !== currentRace.value.length) {
+          horsePositions.value = Array(currentRace.value.length).fill(0);
+        }
 
         const intervalTime = getIntervalTime(selectedSpeed.value);
 
+        // Play start sound only if not already played for this race
+        if (!startSoundPlayed.value) {
+          startSound.value?.play();
+          startSoundPlayed.value = true;
+        }
+
         // Wait for 2 seconds before starting the race
         setTimeout(() => {
-          startSound.value?.play(); // Play the start sound
-
           intervalId.value = setInterval(() => {
-            horsePositions.value = horsePositions.value.map((pos, i) => {
-              if (pos < 100) {
-                return Math.min(pos + Math.random() * 5, 100);
-              }
-              return pos;
-            });
+            if (!paused.value) {
+              horsePositions.value = horsePositions.value.map((pos, i) => {
+                if (pos < 100) {
+                  return Math.min(pos + Math.random() * 5, 100);
+                }
+                return pos;
+              });
 
-            horsePositions.value.forEach((pos, i) => {
-              if (
-                pos >= 100 &&
-                !finishedHorses.value.has(currentRace.value[i].name)
-              ) {
-                finishedHorses.value.add(currentRace.value[i].name);
-                emit("horseFinished", {
-                  horseName: currentRace.value[i].name,
-                  raceIndex: currentRaceIndex.value,
-                });
-              }
-            });
+              horsePositions.value.forEach((pos, i) => {
+                if (
+                  pos >= 100 &&
+                  !finishedHorses.value.has(currentRace.value[i].name)
+                ) {
+                  finishedHorses.value.add(currentRace.value[i].name);
+                  emit("horseFinished", {
+                    horseName: currentRace.value[i].name,
+                    raceIndex: currentRaceIndex.value,
+                  });
+                }
+              });
 
-            if (horsePositions.value.every((pos) => pos >= 100)) {
-              if (intervalId.value !== null) {
-                clearInterval(intervalId.value);
-              }
-              currentRaceIndex.value++;
-              if (currentRaceIndex.value < store.state.programs.length) {
-                startRace();
+              if (horsePositions.value.every((pos) => pos >= 100)) {
+                if (intervalId.value !== null) {
+                  clearInterval(intervalId.value);
+                }
+                currentRaceIndex.value++;
+                startSoundPlayed.value = false; // Reset start sound played flag for next race
+                if (currentRaceIndex.value < store.state.programs.length) {
+                  startRace();
+                }
               }
             }
           }, intervalTime); // Use dynamic interval time based on selected speed
@@ -108,11 +119,18 @@ export default defineComponent({
       () => store.state.isRunning,
       (isRunning) => {
         if (isRunning) {
-          startRace();
+          paused.value = false; // Ensure paused flag is reset when starting
+          if (currentRaceIndex.value === 0) {
+            startRace(); // Start the race only if it's the first race
+          } else {
+            // Resume the race if already started
+            startRace(); // Ensure to play the sound for the current race
+          }
         } else {
           if (intervalId.value !== null) {
             clearInterval(intervalId.value);
           }
+          paused.value = true; // Set paused flag when stopping
         }
       }
     );
