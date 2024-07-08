@@ -173,6 +173,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  background-color: rgba(0, 128, 0, 0.53);
 }
 
 .lane {
@@ -196,8 +197,10 @@ export default defineComponent({
   margin-right: 5px;
   position: absolute;
   left: 0;
-  top: -2px;
+  top: -1px;
   white-space: nowrap;
+  color: white;
+  font-weight: bold;
 }
 
 .speed-controls {
