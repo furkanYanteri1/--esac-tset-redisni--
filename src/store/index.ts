@@ -86,12 +86,17 @@ export default createStore<State>({
         const shuffled = state.horses.sort(() => 0.5 - Math.random());
         return shuffled.slice(0, 10);
       });
-      state.results = Array(state.programs.length).fill([]); // Initialize results array
+      state.results = Array.from({ length: state.programs.length }, () => []); // Initialize results array
     },
-    updateResults(state, payload: { index: number; results: Horse[] }) {
-      state.results[payload.index] = payload.results.map((horse) => ({
-        name: horse.name,
-      }));
+    addHorseToResults(
+      state,
+      payload: { horseName: string; raceIndex: number }
+    ) {
+      if (state.results[payload.raceIndex]) {
+        state.results[payload.raceIndex].push({ name: payload.horseName });
+      } else {
+        state.results[payload.raceIndex] = [{ name: payload.horseName }];
+      }
     },
     setIsRunning(state, isRunning: boolean) {
       state.isRunning = isRunning;

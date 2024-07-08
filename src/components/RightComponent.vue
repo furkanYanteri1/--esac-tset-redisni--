@@ -56,7 +56,8 @@ export default defineComponent({
 .right-component {
   padding: 10px;
   text-align: center;
-  height: 100%;
+  height: 90vh;
+  overflow: scroll !important;
 }
 
 .race-table {
@@ -86,10 +87,10 @@ th {
 }
 
 .program-table th {
-  background-color: #4caf50;
+  background-color: #ff9800;
 }
 
 .result-table th {
-  background-color: #ff9800;
+  background-color: #4caf50;
 }
 </style>

@@ -1,8 +1,29 @@
 <template>
   <div class="middle-component">
+    <div class="speed-controls">
+      <button
+        :class="{ active: selectedSpeed === 'slow' }"
+        @click="selectSpeed('slow')"
+      >
+        Slow
+      </button>
+      <button
+        :class="{ active: selectedSpeed === 'normal' }"
+        @click="selectSpeed('normal')"
+      >
+        Normal
+      </button>
+      <button
+        :class="{ active: selectedSpeed === 'fast' }"
+        @click="selectSpeed('fast')"
+      >
+        Fast
+      </button>
+    </div>
     <div v-if="currentRace.length">
       <h3>Race {{ currentRaceIndex + 1 }}</h3>
       <div class="race-track">
+        <audio ref="startSound" src="/sound/start-sound.mp3"></audio>
         <div v-for="(horse, index) in currentRace" :key="index" class="lane">
           <div class="horse" :style="{ left: horsePositions[index] + '%' }">
             🐎
@@ -26,59 +47,97 @@ interface Horse {
 
 export default defineComponent({
   name: "MiddleComponent",
-  setup() {
+  setup(_, { emit }) {
     const store = useStore();
     const currentRace = ref<Horse[]>([]);
     const currentRaceIndex = ref(0);
     const horsePositions = ref<number[]>([]);
     const intervalId = ref<number | null>(null);
+    const finishedHorses = ref<Set<string>>(new Set());
+    const startSound = ref<HTMLAudioElement | null>(null);
+    const selectedSpeed = ref<string>("normal"); // Default speed is "normal"
+    const paused = ref<boolean>(false); // Flag to track if race is paused
+    const startSoundPlayed = ref<boolean>(false); // Flag to track if start sound has been played for current race
 
     const startRace = () => {
-      console.log("Starting race", currentRaceIndex.value);
       if (currentRaceIndex.value < store.state.programs.length) {
         currentRace.value = store.state.programs[currentRaceIndex.value];
-        horsePositions.value = Array(currentRace.value.length).fill(0);
+        // Initialize positions if not already initialized or resumed
+        if (horsePositions.value.length !== currentRace.value.length) {
+          horsePositions.value = Array(currentRace.value.length).fill(0);
+        }
 
-        intervalId.value = setInterval(() => {
-          horsePositions.value = horsePositions.value.map((pos, i) =>
-            Math.min(pos + Math.random() * 5, 100)
-          );
+        const intervalTime = getIntervalTime(selectedSpeed.value);
 
-          console.log("Horse positions", horsePositions.value);
+        // Play start sound only if not already played for this race
+        if (!startSoundPlayed.value) {
+          startSound.value?.play();
+          startSoundPlayed.value = true;
+        }
 
-          if (horsePositions.value.every((pos) => pos >= 100)) {
-            if (intervalId.value !== null) {
-              clearInterval(intervalId.value);
+        // Wait for 2 seconds before starting the race
+        setTimeout(() => {
+          intervalId.value = setInterval(() => {
+            if (!paused.value) {
+              horsePositions.value = horsePositions.value.map((pos, i) => {
+                if (pos < 100) {
+                  return Math.min(pos + Math.random() * 5, 100);
+                }
+                return pos;
+              });
+
+              horsePositions.value.forEach((pos, i) => {
+                if (
+                  pos >= 100 &&
+                  !finishedHorses.value.has(currentRace.value[i].name)
+                ) {
+                  finishedHorses.value.add(currentRace.value[i].name);
+                  emit("horseFinished", {
+                    horseName: currentRace.value[i].name,
+                    raceIndex: currentRaceIndex.value,
+                  });
+                }
+              });
+
+              if (horsePositions.value.every((pos) => pos >= 100)) {
+                if (intervalId.value !== null) {
+                  clearInterval(intervalId.value);
+                }
+                currentRaceIndex.value++;
+                startSoundPlayed.value = false; // Reset start sound played flag for next race
+                if (currentRaceIndex.value < store.state.programs.length) {
+                  startRace();
+                }
+              }
             }
-            store.commit("updateResults", {
-              index: currentRaceIndex.value,
-              results: currentRace.value,
-            });
-            currentRaceIndex.value++;
-            if (currentRaceIndex.value < store.state.programs.length) {
-              startRace();
-            }
-          }
-        }, 1000) as unknown as number; // Type assertion for setInterval return type
+          }, intervalTime); // Use dynamic interval time based on selected speed
+        }, 2000); // 2-second delay before starting the race
       }
     };
 
     watch(
       () => store.state.isRunning,
       (isRunning) => {
-        console.log("isRunning changed to", isRunning);
         if (isRunning) {
-          startRace();
+          paused.value = false; // Ensure paused flag is reset when starting
+          if (currentRaceIndex.value === 0) {
+            startRace(); // Start the race only if it's the first race
+          } else {
+            // Resume the race if already started
+            startRace(); // Ensure to play the sound for the current race
+          }
         } else {
           if (intervalId.value !== null) {
             clearInterval(intervalId.value);
           }
+          paused.value = true; // Set paused flag when stopping
         }
       }
     );
 
     onMounted(() => {
       currentRaceIndex.value = 0;
+      startSound.value = document.querySelector("audio"); // Initialize the audio element
     });
 
     onUnmounted(() => {
@@ -87,17 +146,43 @@ export default defineComponent({
       }
     });
 
-    return { currentRace, currentRaceIndex, horsePositions };
+    // Function to calculate interval time based on selected speed
+    function getIntervalTime(speed: string): number {
+      switch (speed) {
+        case "slow":
+          return 1000; // Example slower interval time
+        case "normal":
+          return 500; // Default interval time
+        case "fast":
+          return 100; // Example faster interval time
+        default:
+          return 1000; // Default to normal interval time
+      }
+    }
+
+    // Function to handle speed selection
+    function selectSpeed(speed: string): void {
+      selectedSpeed.value = speed;
+    }
+
+    return {
+      currentRace,
+      currentRaceIndex,
+      horsePositions,
+      startSound,
+      selectedSpeed,
+      selectSpeed,
+    };
   },
 });
 </script>
 
 <style scoped>
 .middle-component {
-  border: 1px solid red;
   padding: 10px;
   text-align: center;
-  height: 100%;
+  height: 90vh;
+  overflow: scroll !important;
 }
 
 .race-track {
@@ -107,6 +192,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  background-color: rgba(0, 128, 0, 0.53);
 }
 
 .lane {
@@ -130,7 +216,30 @@ export default defineComponent({
   margin-right: 5px;
   position: absolute;
   left: 0;
-  top: -2px;
+  top: -1px;
   white-space: nowrap;
+  color: white;
+  font-weight: bold;
+}
+
+.speed-controls {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+  background-color: #2c3e50;
+  padding: 5px;
+}
+
+.speed-controls button {
+  background-color: #195d8b;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+.speed-controls button.active {
+  border: 1px solid rgb(123, 187, 255);
 }
 </style>

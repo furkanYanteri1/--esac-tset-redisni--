@@ -3,11 +3,15 @@
     <TopBar
       @generateProgram="generateProgram"
       @toggleStartPause="toggleStartPause"
+      :isRunning="isRunning"
     />
     <div class="content">
-      <LeftComponent class="content-left" />
-      <MiddleComponent class="content-middle" />
-      <RightComponent class="content-right" />
+      <LeftComponent class="content-seperate" />
+      <MiddleComponent
+        @horseFinished="updateResults"
+        class="content-seperate"
+      />
+      <RightComponent class="content-seperate" />
     </div>
   </div>
 </template>
@@ -31,12 +35,26 @@ import { useStore } from "vuex";
 export default class HomeView extends Vue {
   store = useStore();
 
+  get isRunning() {
+    return this.store.state.isRunning;
+  }
+
   generateProgram() {
     this.store.commit("generatePrograms");
   }
 
   toggleStartPause(isRunning: boolean) {
     this.store.commit("setIsRunning", isRunning);
+  }
+
+  updateResults({
+    horseName,
+    raceIndex,
+  }: {
+    horseName: string;
+    raceIndex: number;
+  }) {
+    this.store.commit("addHorseToResults", { horseName, raceIndex });
   }
 }
 </script>
@@ -53,22 +71,10 @@ export default class HomeView extends Vue {
   flex: 1;
 }
 
-.content-left,
-.content-middle,
-.content-right {
+.content-seperate {
   flex: 1;
   padding: 10px;
-}
-
-.content-left {
-  border-right: 2px solid #e74c3c;
-}
-
-.content-middle {
-  border-right: 2px solid #f39c12;
-}
-
-.content-right {
-  border-right: 2px solid #2ecc71;
+  border-right: 2px solid #2c3e50;
+  border-left: 2px solid #2c3e50;
 }
 </style>

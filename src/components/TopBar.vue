@@ -2,8 +2,19 @@
   <div class="top-bar">
     <div class="title">Horse Racing Program</div>
     <div class="actions">
-      <button @click="$emit('generateProgram')">Generate Program</button>
-      <button @click="toggleStartPause">
+      <button
+        ref="generateButton"
+        @click="generateProgram"
+        class="generate-program-button"
+        :disabled="isRunning"
+      >
+        Generate Program
+      </button>
+      <button
+        @click="toggleStartPause"
+        :disabled="!programsGenerated"
+        class="start-button"
+      >
         {{ isRunning ? "Pause" : "Start" }}
       </button>
     </div>
@@ -11,19 +22,46 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
+import { startTour } from "@/tour";
 
 export default defineComponent({
   name: "TopBar",
-  setup(_, { emit }) {
-    const isRunning = ref(false);
+  props: {
+    isRunning: {
+      type: Boolean,
+      required: true,
+    },
+  },
+  setup(props, { emit }) {
+    const generateButton = ref<HTMLButtonElement | null>(null);
+    const programsGenerated = ref(false);
 
     const toggleStartPause = () => {
-      isRunning.value = !isRunning.value;
-      emit("toggleStartPause", isRunning.value);
+      emit("toggleStartPause", !props.isRunning);
     };
 
-    return { toggleStartPause, isRunning };
+    const generateProgram = () => {
+      emit("generateProgram");
+      programsGenerated.value = true; // Simulate program generation
+    };
+
+    onMounted(() => {
+      if (generateButton.value) {
+        generateButton.value.classList.add("shine");
+        setTimeout(() => {
+          generateButton.value?.classList.remove("shine");
+        }, 2000);
+      }
+      startTour();
+    });
+
+    return {
+      toggleStartPause,
+      generateButton,
+      generateProgram,
+      programsGenerated,
+    };
   },
 });
 </script>
@@ -53,7 +91,28 @@ export default defineComponent({
   border-radius: 4px;
 }
 
-.actions button:hover {
+.actions button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+.actions button:hover:enabled {
   background-color: #2980b9;
+}
+
+@keyframes shine {
+  0% {
+    box-shadow: 0 0 15px rgb(86, 235, 255);
+  }
+  50% {
+    box-shadow: 0 0 15px rgb(255, 255, 255);
+  }
+  100% {
+    box-shadow: 0 0 15px rgb(86, 235, 255);
+  }
+}
+
+.shine {
+  animation: shine 2s;
 }
 </style>
